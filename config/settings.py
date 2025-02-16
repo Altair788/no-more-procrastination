@@ -30,6 +30,9 @@ INSTALLED_APPS = [
     "drf_yasg",
     "corsheaders",
     "users",
+    "django_celery_beat",
+    "phonenumber_field",
+
 ]
 
 REST_FRAMEWORK = {
@@ -108,9 +111,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-STATIC_URL = "static/"
-
-STATICFILES_DIRS = (BASE_DIR / "catalog/static", "blog/static")
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
@@ -168,4 +168,39 @@ SIMPLE_JWT = {
 AUTH_USER_MODEL = "users.User"
 
 
+# Настройки для Celery
+
+# URL-адрес брокера сообщений (Например, Redis,
+# который по умолчанию работает на порту 6379)
+CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
+
+# URL-адрес брокера результатов, также Redis
+CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/0"
+
+# Часовой пояс для работы Celery
+CELERY_TIMEZONE = "Europe/Moscow"
+
+# Флаг отслеживания выполнения задач
+CELERY_TASK_TRACK_STARTED = True
+
+# Максимальное время на выполнение задачи
+CELERY_TASK_TIME_LIMIT = 30 * 60
+
+#  чтобы задачи не смешивались с другими проектами
+CELERY_TASK_DEFAULT_QUEUE = "habit_tracker_queue"
+CELERY_IGNORE_RESULT = True
+#  для безопасности
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+
+# Настройки для Celery beat
+
+CELERY_BEAT_SCHEDULE = {
+    # "send-mailing": {
+    #     "task": "habit_tracker.tasks.send_mailing",
+    #     "schedule": timedelta(minutes=1),
+        # "schedule": crontab(hour=0, minute=0),
+    # },
+}
 
