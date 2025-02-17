@@ -1,6 +1,7 @@
 from django.db import models
 
 from users.models import User
+from django.core.exceptions import ValidationError
 
 NULLABLE = {'null': True,
             'blank': True}
@@ -19,7 +20,7 @@ class Habit(models.Model):
         linked_action (ForeignKey): Связанная приятная привычка.
         frequency (int): Периодичность выполнения привычки в днях.
         reward (str): Вознаграждение за выполнение привычки.
-        duration (DurationField): Время на выполнение привычки.
+        duration (int): Время на выполнение привычки в секундах.
         is_public (bool): Признак публичности привычки.
     """
     owner = models.ForeignKey(
@@ -67,15 +68,42 @@ class Habit(models.Model):
         verbose_name="Вознаграждение",
         help_text="Укажите вознаграждение за выполнение привычки",
         blank=True)
-    duration = models.DurationField(
-        verbose_name="Время на выполнение",
-        help_text="Укажите предполагаемое время выполнения"
+    duration = models.PositiveIntegerField(
+        verbose_name="Время на выполнение (в секундах)",
+        help_text="Укажите предполагаемое время выполнения в секундах"
     )
     is_public = models.BooleanField(
         default=False,
         verbose_name="Публичная",
         help_text="Отметьте, если хотите сделать эту привычку публичной"
     )
+
+    def clean(self):
+        """
+        Проверка бизнес-логики на уровне модели (иначе в админке можно обойти валидацию).
+        """
+        # Проверка: не должно быть заполнено одновременно и поле вознаграждения, и поле связанной привычки.
+        if self.reward and self.linked_action:
+            raise ValidationError("Нельзя указать одновременно вознаграждение и "
+                                  "связанную приятную привычку.")
+
+        # Проверка: время выполнения должно быть не больше 120 секунд.
+        if self.duration > 120:
+            raise ValidationError("Время выполнения привычки не должно превышать 120 секунд.")
+
+        # Проверка: в связанные привычки могут попадать только привычки с признаком приятной привычки.
+        if self.linked_action and not self.linked_action.is_pleasant:
+            raise ValidationError(
+                "В связанные привычки могут попадать только привычки с признаком приятной привычки.")
+
+        # Проверка: у приятной привычки не может быть вознаграждения или связанной привычки.
+        if self.is_pleasant and (self.reward or self.linked_action is not None):
+            raise ValidationError("У приятной привычки не может быть вознаграждения или связанной привычки.")
+
+        # Проверка: нельзя выполнять привычку реже, чем 1 раз в 7 дней.
+        if self.frequency < 1 or self.frequency > 7:
+            raise ValidationError(
+                "Периодичность выполнения должна быть от 1 до 7 дней (не реже одного раза в неделю).")
 
     def __repr__(self) -> str:
         """Возвращает строковое представление объекта Привычка.
