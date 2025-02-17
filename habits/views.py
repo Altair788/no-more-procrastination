@@ -23,13 +23,13 @@ class HabitViewSet(ModelViewSet):
         """
         Возвращает привычки, принадлежащие текущему пользователю.
         """
-        return Habit.objects.filter(owner=self.request.user)
+        return Habit.objects.filter(owner=self.request.user.id)
 
     def perform_create(self, serializer):
         """
         Устанавливает текущего пользователя как владельца привычки.
         """
-        serializer.save(owner=self.request.user)
+        serializer.save(owner=self.request.user.id)
 
     def perform_update(self, serializer):
         """
