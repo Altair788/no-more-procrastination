@@ -2,6 +2,9 @@ from rest_framework.exceptions import ValidationError
 
 
 class HabitValidator:
+    """
+    Валидатор для проверки бизнес-логики привычек.
+    """
 
     def __call__(self, data):
         """
