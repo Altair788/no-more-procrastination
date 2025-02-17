@@ -24,19 +24,19 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "crispy_forms",
+    "crispy_bootstrap4",
+    "django_celery_beat",
+    "phonenumber_field",
     "rest_framework",
     "django_filters",
     "rest_framework_simplejwt",
     "drf_yasg",
     "corsheaders",
     "users",
-    "django_celery_beat",
-    "phonenumber_field",
+    "django_extensions",
     "drf_spectacular",
-    "crispy_forms",
-    "crispy_bootstrap4",
     "habits",
-
 ]
 
 REST_FRAMEWORK = {
@@ -61,6 +61,7 @@ REST_FRAMEWORK = {
 
 
 SPECTACULAR_SETTINGS = {
+
     'CAMELIZE_NAMES': True,  # Включаем преобразование имен в camelCase
     'POSTPROCESSING_HOOKS': [
         'drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields',
@@ -172,18 +173,6 @@ if CACHE_ENABLED:
         }
     }
 
-REST_FRAMEWORK = {
-    'DEFAULT_FILTER_BACKENDS': (
-        "django_filters.rest_framework.DjangoFilterBackend",
-    ),
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.AllowAny',
-    ),
-
-}
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
