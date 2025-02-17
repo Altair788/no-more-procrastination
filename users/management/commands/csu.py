@@ -10,14 +10,14 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Получаем данные из переменных окружения
-        superuser_username = os.getenv("SUPERUSER_USERNAME")
+        superuser_email = os.getenv("SUPERUSER_EMAIL")
         superuser_password = os.getenv("SUPERUSER_PASSWORD")
-        normal_user_username = os.getenv("NORMAL_USER_USERNAME")
+        normal_user_email = os.getenv("NORMAL_USER_EMAIL")
         normal_user_password = os.getenv("NORMAL_USER_PASSWORD")
 
         # Проверяем, существует ли суперпользователь
         superuser, created = User.objects.get_or_create(
-            username=superuser_username,
+            email=superuser_email,
             defaults={
                 "is_staff": True,
                 "is_active": True,
@@ -30,16 +30,16 @@ class Command(BaseCommand):
             # self.stdout.write(self.style.SUCCESS(f"Пароль суперпользователя установлен: {superuser_password}"))
             superuser.save()
             self.stdout.write(
-                self.style.SUCCESS(f"Суперпользователь создан: {superuser_username}")
+                self.style.SUCCESS(f"Суперпользователь с почтой {superuser_email} создан.")
             )
         else:
             self.stdout.write(
-                self.style.WARNING(f"Пользователь {superuser_username} уже существует.")
+                self.style.WARNING(f"Пользователь с почтой {superuser_email} уже существует.")
             )
 
         # Проверяем, существует ли обычный пользователь
         normal_user, created = User.objects.get_or_create(
-            username=normal_user_username,
+            email=normal_user_email,
             defaults={
                 "is_staff": False,
                 "is_active": True,
@@ -53,12 +53,12 @@ class Command(BaseCommand):
             normal_user.save()
             self.stdout.write(
                 self.style.SUCCESS(
-                    f"Обычный пользователь создан: {normal_user_username}"
+                    f"Обычный пользователь создан: email - {normal_user_email}"
                 )
             )
         else:
             self.stdout.write(
                 self.style.WARNING(
-                    f"Пользователь {normal_user_username} уже существует."
+                    f"Пользователь с почтой {normal_user_email} уже существует."
                 )
             )
