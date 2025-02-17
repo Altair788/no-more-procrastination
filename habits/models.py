@@ -1,34 +1,30 @@
 from django.db import models
 
 from users.models import User
+
 NULLABLE = {'null': True,
             'blank': True}
 
 
 class Habit(models.Model):
     """
-    Модель, представляющая привычку
+    Модель, представляющая привычку.
 
-    Attributes:
-        owner (models. ForeignKey): создатель привычки
-        location (str): место, в котором необходимо выполнять привычку.
-        time (models. Timefield): время, когда необходимо выполнять привычку.
-        action (str): действие, которое представляет собой привычка.
-        is_pleasant (bool): признак приятной привычки — привычка,
-        которую можно привязать к выполнению полезной привычки.
-        linked_action (str): связанная привычка — привычка,
-        которая связана с другой привычкой, важно указывать для полезных привычек,
-        но не для приятных.
-        frequency (int): периодичность (по умолчанию ежедневная)
-         — периодичность выполнения привычки для напоминания в днях.
-        reward (str): вознаграждение — чем пользователь должен себя вознаградить после выполнения.
-        duration (DurationField): время на выполнение — время, которое предположительно потратит
-         пользователь на выполнение привычки.
-        is_public (bool): признак публичности — привычки можно публиковать в общий доступ,
-         чтобы другие пользователи могли брать в пример чужие привычки.
+    Атрибуты:
+        owner (ForeignKey): Пользователь, создавший привычку.
+        location (str): Место выполнения привычки.
+        time (TimeField): Время выполнения привычки.
+        action (str): Действие, которое представляет собой привычка.
+        is_pleasant (bool): Признак приятной привычки.
+        linked_action (ForeignKey): Связанная приятная привычка.
+        frequency (int): Периодичность выполнения привычки в днях.
+        reward (str): Вознаграждение за выполнение привычки.
+        duration (DurationField): Время на выполнение привычки.
+        is_public (bool): Признак публичности привычки.
     """
     owner = models.ForeignKey(
-        User, on_delete=models.CASCADE,
+        User,
+        on_delete=models.CASCADE,
         verbose_name="Создатель",
         help_text="Пользователь, создавший эту привычку"
     )
@@ -36,7 +32,7 @@ class Habit(models.Model):
         max_length=255,
         verbose_name="место",
         help_text='Укажите место, в котором необходимо выполнять привычку'
-        )
+    )
     time = models.TimeField(
         verbose_name="Время",
         help_text="Укажите время начала выполнения привычки"
@@ -58,13 +54,14 @@ class Habit(models.Model):
         related_name="linked_habits",
         verbose_name="Связанная привычка",
         help_text="Укажите связанную приятную привычку",
+        on_delete=models.SET_NULL,
         **NULLABLE
     )
     frequency = models.PositiveIntegerField(
         default=1,
         verbose_name="Периодичность",
         help_text="Укажите периодичность выполнения в днях (от 1 до 7)"
-        )
+    )
     reward = models.CharField(
         max_length=255,
         verbose_name="Вознаграждение",
@@ -85,6 +82,7 @@ class Habit(models.Model):
 
         Returns:
             str: Строковое представление объекта с его атрибутами.
+                  Например: Habit(owner=..., location=..., ...)
         """
         return f"""Habit(
         owner={self.owner},
@@ -102,12 +100,11 @@ class Habit(models.Model):
         """Возвращает строковое представление привычки.
 
         Returns:
-            str: Привычка.
+            str: Название действия привычки.
+                  Например: "Бег по утрам".
         """
         return self.action
 
     class Meta:
         verbose_name = "Привычка"
         verbose_name_plural = "Привычки"
-
-
