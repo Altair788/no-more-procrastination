@@ -33,6 +33,8 @@ INSTALLED_APPS = [
     "django_celery_beat",
     "phonenumber_field",
     "drf_spectacular",
+    "crispy_forms",
+    "crispy_bootstrap4",
 
 ]
 
@@ -132,6 +134,8 @@ USE_TZ = True
 
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+STATIC_URL = "static/"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
