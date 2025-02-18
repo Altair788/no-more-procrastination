@@ -1,7 +1,18 @@
+import json
+
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from habits.models import Habit
 from users.models import User
+
+from rest_framework.test import APITestCase
+from rest_framework import status
+
+
+#  импорты для habits/tasks
+from unittest.mock import patch
+
+from habits.tasks import run_telegram_bot
 
 
 class HabitModelTest(TestCase):
@@ -183,10 +194,195 @@ f"is_public={habit.is_public})"
         )
 
         # Выводим фактическое значение repr(habit) и ожидаемое значение expected_repr
-        print("Фактическое значение repr(habit):")
-        print(repr(habit))
-        print("\nОжидаемое значение expected_repr:")
-        print(expected_repr)
+        # print("Фактическое значение repr(habit):")
+        # print(repr(habit))
+        # print("\nОжидаемое значение expected_repr:")
+        # print(expected_repr)
 
         self.assertEqual(repr(habit), expected_repr)
+
+#  Тест для run_telegram_bot
+class RunTelegramBotTaskTest(TestCase):
+    @patch("habits.tasks.bot.polling")
+    def test_run_telegram_bot(self, mock_polling):
+        """
+        Тестируем задачу run_telegram_bot.
+        Проверяем, что polling вызывается.
+        """
+        run_telegram_bot()
+        mock_polling.assert_called_once_with(none_stop=True)
+
+
+#  тесты на CRUD habit (ViewSet)
+
+class HabitViewSetTest(APITestCase):
+    def setUp(self):
+        """
+        Создаём пользователя и несколько привычек для тестов.
+        """
+        self.user = User.objects.create_user(email="test@example.com", password="password123")
+        self.client.force_authenticate(user=self.user)  # Аутентифицируем пользователя
+
+        self.habit1 = Habit.objects.create(
+            owner=self.user,
+            location="Парк",
+            time="07:00:00",
+            action="Прогулка",
+            duration=60,
+            frequency=1,
+            is_public=False,
+        )
+        self.habit2 = Habit.objects.create(
+            owner=self.user,
+            location="Дом",
+            time="08:00:00",
+            action="Йога",
+            duration=30,
+            frequency=2,
+            is_public=True,
+        )
+
+    def test_get_habits(self):
+        """
+        Тест получения списка привычек текущего пользователя.
+        """
+        response = self.client.get("/habits/")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data["results"]), 2)  # Проверяем, что возвращаются обе привычки
+
+    def test_create_habit(self):
+        """
+        Тест создания новой привычки.
+        """
+        data = {
+            "location": "Офис",
+            "time": "09:00:00",
+            "action": "Работа над проектом",
+            "duration": 90,
+            "frequency": 3,
+            "is_public": False,
+        }
+        response = self.client.post(
+            "/habits/",
+            data=json.dumps(data),  # Преобразуем данные в строку JSON
+            content_type="application/json"  # Указываем тип контента
+        )
+        # print("Response data:", response.data)  # Выводим данные ответа для отладки
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_update_habit(self):
+        """
+        Тест обновления существующей привычки.
+        """
+        data = {
+            "location": "Изменённое место",
+            "time": "10:00:00",
+            "action": "Изменённое действие",
+            "duration": 45,
+            "frequency": 2,
+            "is_public": False,
+        }
+        response = self.client.put(
+            f"/habits/{self.habit1.id}/",
+            data=json.dumps(data),  # Преобразуем данные в строку JSON
+            content_type="application/json"  # Указываем тип контента
+        )
+        # print("Response data:", response.data)  # Выводим данные ответа для отладки
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_delete_habit(self):
+        """
+        Тест удаления привычки.
+        """
+        response = self.client.delete(f"/habits/{self.habit1.id}/")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Habit.objects.filter(id=self.habit1.id).exists())
+
+    def test_update_public_habit(self):
+        """
+        Тест запрета редактирования публичной привычки.
+        """
+        data = {
+            "location": "Изменённое место",
+            "time": "10:00:00",
+            "action": "Изменённое действие",
+            "duration": 45,
+            "frequency": 2,
+            "is_public": True,
+        }
+        response = self.client.put(
+            f"/habits/{self.habit2.id}/",
+            data=json.dumps(data),  # Преобразуем данные в строку JSON
+            content_type="application/json"  # Указываем тип контента
+        )
+        # print("Response data:", response.data)  # Выводим данные ответа для отладки
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_delete_public_habit(self):
+        """
+        Тест запрета удаления публичной привычки.
+        """
+        response = self.client.delete(f"/habits/{self.habit2.id}/")
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+#  тестируем дженерик LictApiView получения списка публичных привычек
+
+class PublicHabitListApiViewTest(APITestCase):
+    def setUp(self):
+        """
+        Создаём пользователей и публичные/непубличные привычки для тестов.
+        """
+        user1 = User.objects.create_user(email="user1@example.com", password="password123")
+        user2 = User.objects.create_user(email="user2@example.com", password="password123")
+
+        Habit.objects.create(
+            owner=user1,
+            location="Парк",
+            time="07:00:00",
+            action="Прогулка",
+            duration=60,
+            frequency=1,
+            is_public=True,  # Публичная привычка
+        )
+
+        Habit.objects.create(
+            owner=user2,
+            location="Дом",
+            time="08:00:00",
+            action="Йога",
+            duration=30,
+            frequency=2,
+            is_public=False,  # Непубличная привычка
+        )
+
+    def test_get_public_habits(self):
+        """
+        Тест получения списка публичных привычек.
+        """
+        response = self.client.get("/habits/public/")  # Исправленный URL
+
+        # Проверяем статус ответа
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Проверяем количество возвращённых записей
+        self.assertEqual(len(response.data["results"]), 1)
+
+    def test_only_public_habits_returned(self):
+        """
+        Тест проверки фильтрации только публичных привычек.
+        """
+        # Запрос к эндпоинту с публичными данными.
+        response = self.client.get("/habits/public/")  # Исправленный URL
+
+        # Проверяем статус ответа
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Проверяем, что возвращена только одна публичная привычка
+        self.assertEqual(len(response.data["results"]), 1)
+
+        # Проверяем, что возвращённая привычка — это публичная привычка
+        public_habit = response.data["results"][0]
+        self.assertEqual(public_habit["action"], "Прогулка")
+        self.assertTrue(public_habit["is_public"])
 
