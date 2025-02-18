@@ -6,6 +6,9 @@ from users.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """
+        Сериализатор для модели User.
+    """
 
     password = serializers.CharField(write_only=True, style={"input_type": "password"})
     id = serializers.IntegerField(read_only=True)
@@ -51,8 +54,6 @@ class UserSerializer(serializers.ModelSerializer):
             "is_active",  # Только для чтения
             "token",  # Только для чтения
         )
-
-        read_only_fields = ("id",)
 
 
 class PasswordResetSerializer(serializers.Serializer):
