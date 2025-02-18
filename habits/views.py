@@ -52,4 +52,5 @@ class HabitViewSet(ModelViewSet):
 class PublicHabitListApiView(ListAPIView):
     queryset = Habit.objects.filter(is_public=True)
     serializer_class = HabitSerializer
+    pagination_class = HabitPaginator
     permission_classes = [AllowAny]
