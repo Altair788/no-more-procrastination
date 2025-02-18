@@ -1,3 +1,5 @@
+import secrets
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
@@ -7,6 +9,8 @@ NULLABLE = {"blank": True, "null": True}
 
 class User(AbstractUser):
     username = None
+    token = models.CharField(max_length=32, blank=True, null=True)
+    is_active = models.BooleanField(default=False)
 
     email = models.EmailField(
         unique=True, verbose_name="почта", help_text="укажите почту"
@@ -37,8 +41,15 @@ class User(AbstractUser):
         **NULLABLE
     )
 
+    def generate_token(self):
+        self.token = secrets.token_hex(16)
+        self.save()
+
+
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
+
+
 
     class Meta:
         verbose_name = "Пользователь"
