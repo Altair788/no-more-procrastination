@@ -113,16 +113,16 @@ class Habit(models.Model):
                   Например: Habit(owner=..., location=..., ...)
         """
         return f"""Habit(
-        owner={self.owner},
-        location={self.location},
-        time={self.time},
-        action={self.action},
-        is_pleasant={self.is_pleasant},
-        linked_action={self.linked_action},
-        frequency={self.frequency},
-        reward={self.reward},
-        duration={self.duration},
-        is_public={self.is_public})"""
+owner={self.owner},
+location={self.location},
+time={self.time},
+action={self.action},
+is_pleasant={self.is_pleasant},
+linked_action={self.linked_action},
+frequency={self.frequency},
+reward={self.reward},
+duration={self.duration},
+is_public={self.is_public})"""
 
     def __str__(self) -> str:
         """Возвращает строковое представление привычки.
