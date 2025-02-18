@@ -37,6 +37,17 @@ dependencies = [
 
 ]
 
+[tool.coverage.run]
+omit = [
+    "*/migrations/*",  # Исключаем все файлы миграций
+    "*/__init__.py",   # Исключаем все служебные __init__.py
+    "manage.py",       # Исключаем manage.py
+    "config/asgi.py",  # Исключаем служебные файлы проекта
+    "config/wsgi.py",
+]
+
+
+
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
