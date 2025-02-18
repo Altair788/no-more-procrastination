@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from datetime import timedelta
+from celery.schedules import crontab
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env", override=True)
@@ -46,8 +47,8 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    # "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.AllowAny",),
-    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.AllowAny",),
+    # "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_RENDERER_CLASSES": (
         "djangorestframework_camel_case.render.CamelCaseJSONRenderer",
         "djangorestframework_camel_case.render.CamelCaseBrowsableAPIRenderer",
@@ -209,13 +210,12 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 
 # Настройки для Celery beat
-
 CELERY_BEAT_SCHEDULE = {
-    # "send-mailing": {
-    #     "task": "habit_tracker.tasks.send_mailing",
-    #     "schedule": timedelta(minutes=1),
-        # "schedule": crontab(hour=0, minute=0),
-    # },
+    "send-habit-reminders": {
+        "task": "habits.tasks.send_daily_reminders",
+        "schedule": timedelta(minutes=1),
+        # "schedule": crontab(hour=8, minute=0),  # Ежедневно в 8:00 утра
+    },
 }
 
 # Разрешаем CORS для localhost на разных портах
@@ -240,3 +240,7 @@ CORS_ALLOW_ALL_ORIGINS = False
 
 # Дополнительные настройки для разработки
 CORS_ALLOW_CREDENTIALS = True
+
+
+# настройки для телеграм - бота
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
