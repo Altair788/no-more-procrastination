@@ -9,9 +9,9 @@ from django.core.mail import send_mail
 
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-
 # Создаём экземпляр бота
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
+
 
 # Команда /start
 @bot.message_handler(commands=['start'])
@@ -27,6 +27,7 @@ def start(message):
         "Привет! Я ваш трекер привычек. Вы можете управлять своими привычками здесь.",
         reply_markup=markup
     )
+
 
 # Callback-кнопка "Мои привычки"
 @bot.callback_query_handler(func=lambda call: call.data == "my_habits")
@@ -50,6 +51,7 @@ def show_habits(call):
 
     bot.send_message(call.message.chat.id, message)
 
+
 # Задача Celery для запуска Telegram-бота
 @shared_task(bind=True)
 def run_telegram_bot(self):
@@ -62,9 +64,6 @@ def run_telegram_bot(self):
     except Exception as exc:
         print(f"Ошибка при запуске Telegram-бота: {exc}")
         raise self.retry(exc=exc, countdown=10)  # Повторяем задачу через 10 секунд при ошибке
-
-
-
 
 
 @shared_task(bind=True, max_retries=3)
