@@ -1,13 +1,12 @@
-from celery import shared_task
 import telebot
+from celery import shared_task
 from django.conf import settings
+from django.core.mail import send_mail
 from django.utils.timezone import now
+from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from config.settings import TELEGRAM_BOT_TOKEN
 from habits.models import Habit
-from django.core.mail import send_mail
-
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 # Создаём экземпляр бота
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)

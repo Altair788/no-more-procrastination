@@ -1,9 +1,10 @@
 import os
 import sys
-from pathlib import Path
-from dotenv import load_dotenv
 from datetime import timedelta
+from pathlib import Path
+
 from celery.schedules import crontab
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env", override=True)

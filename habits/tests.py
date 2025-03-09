@@ -1,18 +1,15 @@
 import json
-
-from django.core.exceptions import ValidationError
-from django.test import TestCase
-from habits.models import Habit
-from users.models import User
-
-from rest_framework.test import APITestCase
-from rest_framework import status
-
-
 #  импорты для habits/tasks
 from unittest.mock import patch
 
+from django.core.exceptions import ValidationError
+from django.test import TestCase
+from rest_framework import status
+from rest_framework.test import APITestCase
+
+from habits.models import Habit
 from habits.tasks import run_telegram_bot
+from users.models import User
 
 
 class HabitModelTest(TestCase):

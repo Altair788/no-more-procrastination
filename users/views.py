@@ -1,18 +1,18 @@
 import secrets
 
+from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.core.mail import send_mail
-from rest_framework.views import APIView
-from users.serializers import PasswordResetSerializer, PasswordResetConfirmSerializer
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
+from rest_framework.views import APIView
 
 from config.settings import DEFAULT_FROM_EMAIL
 from users.models import User
-from users.serializers import UserSerializer
+from users.serializers import (PasswordResetConfirmSerializer,
+                               PasswordResetSerializer, UserSerializer)
 
 
 class UserCreateAPIView(CreateAPIView):

@@ -1,7 +1,7 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from users.models import User
-from django.core.exceptions import ValidationError
 
 NULLABLE = {"null": True, "blank": True}
 
