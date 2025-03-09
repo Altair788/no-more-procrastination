@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 from dotenv import load_dotenv
 from datetime import timedelta
@@ -104,11 +105,11 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": os.getenv("NAME"),
-        "USER": os.getenv("USER"),
-        "PASSWORD": os.getenv("PASSWORD"),
-        "HOST": os.getenv("HOST"),
-        "PORT": os.getenv("PORT"),
+        "NAME": os.getenv("POSTGRES_DB"),
+        "USER": os.getenv("POSTGRES_USER"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+        "HOST": os.getenv("POSTGRES_HOST"),
+        "PORT": os.getenv("POSTGRES_PORT"),
     }
 }
 
@@ -140,6 +141,15 @@ USE_TZ = True
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 STATIC_URL = "static/"
+STATICFILES_DIRS = (
+    [os.path.join(BASE_DIR, "static")]
+    if (
+        os.path.exists(os.path.join(BASE_DIR, "static")) and
+        os.listdir(os.path.join(BASE_DIR, "static"))
+    )
+    else []
+)
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -187,10 +197,10 @@ AUTH_USER_MODEL = "users.User"
 
 # URL-адрес брокера сообщений (Например, Redis,
 # который по умолчанию работает на порту 6379)
-CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
 
 # URL-адрес брокера результатов, также Redis
-CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/0"
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
 
 # Часовой пояс для работы Celery
 CELERY_TIMEZONE = "Europe/Moscow"
@@ -244,3 +254,19 @@ CORS_ALLOW_CREDENTIALS = True
 
 # настройки для телеграм - бота
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+
+
+
+
+# CICD ([flake8])
+# это нужно, чтобы при запуске тестов использовалась легкая SQLite, а не PostgreSQL
+
+if "test" in sys.argv:
+    CELERY_TASK_ALWAYS_EAGER = True  # Выполнять задачи синхронно
+    CELERY_TASK_EAGER_PROPAGATES = True  # Пропускать ошибки из задач
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "test_db.sqlite3",
+        }
+    }
