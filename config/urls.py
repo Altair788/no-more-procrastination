@@ -2,7 +2,11 @@ from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import include, path
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularSwaggerView,
+    SpectacularRedocView,
+)
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
@@ -32,13 +36,12 @@ urlpatterns = [
     #     name="schema-swagger-ui",
     # ),
     # path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
-
     # path('api/schema/', SpectacularAPIView.as_view(permission_classes=[CanViewAPI]), name='schema'),
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-
-    path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-
-    path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path(
+        "swagger/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"
+    ),
+    path("redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
 ]
 
 # Добавляем маршруты для работы с медиафайлами только в режиме разработки

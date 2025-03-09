@@ -18,7 +18,6 @@ class HabitViewSet(ModelViewSet):
     pagination_class = HabitPaginator
     permission_classes = [IsAuthenticated]
 
-
     def get_queryset(self):
         """
         Возвращает привычки, принадлежащие текущему пользователю.

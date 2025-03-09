@@ -20,7 +20,9 @@ class HabitModelTest(TestCase):
         """
         Создаём пользователя и базовые данные для тестов.
         """
-        self.user = User.objects.create_user(email="test@example.com", password="password123")
+        self.user = User.objects.create_user(
+            email="test@example.com", password="password123"
+        )
         self.linked_habit = Habit.objects.create(
             owner=self.user,
             location="Парк",
@@ -65,7 +67,10 @@ class HabitModelTest(TestCase):
         )
         with self.assertRaises(ValidationError) as e:
             habit.clean()
-        self.assertIn("Нельзя указать одновременно вознаграждение и связанную приятную привычку.", str(e.exception))
+        self.assertIn(
+            "Нельзя указать одновременно вознаграждение и связанную приятную привычку.",
+            str(e.exception),
+        )
 
     def test_clean_duration_exceeds_limit(self):
         """
@@ -81,7 +86,10 @@ class HabitModelTest(TestCase):
         )
         with self.assertRaises(ValidationError) as e:
             habit.clean()
-        self.assertIn("Время выполнения привычки не должно превышать 120 секунд.", str(e.exception))
+        self.assertIn(
+            "Время выполнения привычки не должно превышать 120 секунд.",
+            str(e.exception),
+        )
 
     def test_clean_linked_action_not_pleasant(self):
         """
@@ -110,8 +118,10 @@ class HabitModelTest(TestCase):
         with self.assertRaises(ValidationError) as e:
             habit.clean()
 
-        self.assertIn("В связанные привычки могут попадать только привычки с признаком приятной привычки.",
-                      str(e.exception))
+        self.assertIn(
+            "В связанные привычки могут попадать только привычки с признаком приятной привычки.",
+            str(e.exception),
+        )
 
     def test_clean_pleasant_habit_with_reward_or_linked_action(self):
         """
@@ -131,7 +141,10 @@ class HabitModelTest(TestCase):
         with self.assertRaises(ValidationError) as e:
             habit_with_reward.clean()
 
-        self.assertIn("У приятной привычки не может быть вознаграждения или связанной привычки.", str(e.exception))
+        self.assertIn(
+            "У приятной привычки не может быть вознаграждения или связанной привычки.",
+            str(e.exception),
+        )
 
     def test_clean_frequency_out_of_bounds(self):
         """
@@ -149,7 +162,9 @@ class HabitModelTest(TestCase):
         with self.assertRaises(ValidationError) as e:
             habit.clean()
 
-        self.assertIn("Периодичность выполнения должна быть от 1 до 7 дней", str(e.exception))
+        self.assertIn(
+            "Периодичность выполнения должна быть от 1 до 7 дней", str(e.exception)
+        )
 
     def test_str_representation(self):
         """
@@ -181,16 +196,16 @@ class HabitModelTest(TestCase):
 
         expected_repr = (
             f"Habit(\n"
-f"owner={habit.owner},\n"
-f"location={habit.location},\n"
-f"time={habit.time},\n"
-f"action={habit.action},\n"
-f"is_pleasant={habit.is_pleasant},\n"
-f"linked_action={habit.linked_action},\n"
-f"frequency={habit.frequency},\n"
-f"reward={habit.reward},\n"
-f"duration={habit.duration},\n"
-f"is_public={habit.is_public})"
+            f"owner={habit.owner},\n"
+            f"location={habit.location},\n"
+            f"time={habit.time},\n"
+            f"action={habit.action},\n"
+            f"is_pleasant={habit.is_pleasant},\n"
+            f"linked_action={habit.linked_action},\n"
+            f"frequency={habit.frequency},\n"
+            f"reward={habit.reward},\n"
+            f"duration={habit.duration},\n"
+            f"is_public={habit.is_public})"
         )
 
         # Выводим фактическое значение repr(habit) и ожидаемое значение expected_repr
@@ -200,6 +215,7 @@ f"is_public={habit.is_public})"
         # print(expected_repr)
 
         self.assertEqual(repr(habit), expected_repr)
+
 
 #  Тест для run_telegram_bot
 class RunTelegramBotTaskTest(TestCase):
@@ -215,12 +231,15 @@ class RunTelegramBotTaskTest(TestCase):
 
 #  тесты на CRUD habit (ViewSet)
 
+
 class HabitViewSetTest(APITestCase):
     def setUp(self):
         """
         Создаём пользователя и несколько привычек для тестов.
         """
-        self.user = User.objects.create_user(email="test@example.com", password="password123")
+        self.user = User.objects.create_user(
+            email="test@example.com", password="password123"
+        )
         self.client.force_authenticate(user=self.user)  # Аутентифицируем пользователя
 
         self.habit1 = Habit.objects.create(
@@ -248,7 +267,9 @@ class HabitViewSetTest(APITestCase):
         """
         response = self.client.get("/habits/")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data["results"]), 2)  # Проверяем, что возвращаются обе привычки
+        self.assertEqual(
+            len(response.data["results"]), 2
+        )  # Проверяем, что возвращаются обе привычки
 
     def test_create_habit(self):
         """
@@ -265,7 +286,7 @@ class HabitViewSetTest(APITestCase):
         response = self.client.post(
             "/habits/",
             data=json.dumps(data),  # Преобразуем данные в строку JSON
-            content_type="application/json"  # Указываем тип контента
+            content_type="application/json",  # Указываем тип контента
         )
         # print("Response data:", response.data)  # Выводим данные ответа для отладки
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -285,7 +306,7 @@ class HabitViewSetTest(APITestCase):
         response = self.client.put(
             f"/habits/{self.habit1.id}/",
             data=json.dumps(data),  # Преобразуем данные в строку JSON
-            content_type="application/json"  # Указываем тип контента
+            content_type="application/json",  # Указываем тип контента
         )
         # print("Response data:", response.data)  # Выводим данные ответа для отладки
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -313,7 +334,7 @@ class HabitViewSetTest(APITestCase):
         response = self.client.put(
             f"/habits/{self.habit2.id}/",
             data=json.dumps(data),  # Преобразуем данные в строку JSON
-            content_type="application/json"  # Указываем тип контента
+            content_type="application/json",  # Указываем тип контента
         )
         # print("Response data:", response.data)  # Выводим данные ответа для отладки
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -328,13 +349,18 @@ class HabitViewSetTest(APITestCase):
 
 #  тестируем дженерик LictApiView получения списка публичных привычек
 
+
 class PublicHabitListApiViewTest(APITestCase):
     def setUp(self):
         """
         Создаём пользователей и публичные/непубличные привычки для тестов.
         """
-        user1 = User.objects.create_user(email="user1@example.com", password="password123")
-        user2 = User.objects.create_user(email="user2@example.com", password="password123")
+        user1 = User.objects.create_user(
+            email="user1@example.com", password="password123"
+        )
+        user2 = User.objects.create_user(
+            email="user2@example.com", password="password123"
+        )
 
         Habit.objects.create(
             owner=user1,
@@ -385,4 +411,3 @@ class PublicHabitListApiViewTest(APITestCase):
         public_habit = response.data["results"][0]
         self.assertEqual(public_habit["action"], "Прогулка")
         self.assertTrue(public_habit["is_public"])
-

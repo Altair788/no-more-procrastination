@@ -52,17 +52,16 @@ class UserDestroyAPIView(generics.DestroyAPIView):
 
 class UserRegisterAPIView(CreateAPIView):
     """
-        Представление для регистрации нового пользователя.
+    Представление для регистрации нового пользователя.
 
-        - Принимает email, пароль и другие данные пользователя.
-        - Создаёт нового пользователя с полем `is_active=False`.
-        - Генерирует токен для подтверждения email.
-        - Отправляет письмо со ссылкой для подтверждения email.
+    - Принимает email, пароль и другие данные пользователя.
+    - Создаёт нового пользователя с полем `is_active=False`.
+    - Генерирует токен для подтверждения email.
+    - Отправляет письмо со ссылкой для подтверждения email.
     """
+
     serializer_class = UserSerializer
     permission_classes = (AllowAny,)
-
-
 
     def perform_create(self, serializer):
         user = serializer.save()
@@ -85,14 +84,16 @@ class UserRegisterAPIView(CreateAPIView):
 
 class PasswordResetAPIView(APIView):
     """
-        Представление для запроса сброса пароля.
+    Представление для запроса сброса пароля.
 
-        - Принимает email пользователя.
-        - Проверяет существование пользователя с указанным email.
-        - Генерирует токен для сброса пароля.
-        - Отправляет письмо с инструкцией по сбросу пароля.
+    - Принимает email пользователя.
+    - Проверяет существование пользователя с указанным email.
+    - Генерирует токен для сброса пароля.
+    - Отправляет письмо с инструкцией по сбросу пароля.
     """
+
     permission_classes = (AllowAny,)
+
     def post(self, request):
         serializer = PasswordResetSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -109,18 +110,22 @@ class PasswordResetAPIView(APIView):
             recipient_list=[user.email],
         )
 
-        return Response({"message": "Инструкция по сбросу пароля отправлена на ваш email."})
+        return Response(
+            {"message": "Инструкция по сбросу пароля отправлена на ваш email."}
+        )
 
 
 class PasswordResetConfirmAPIView(APIView):
     """
-        Представление для подтверждения сброса пароля.
+    Представление для подтверждения сброса пароля.
 
-        - Принимает токен и новый пароль.
-        - Проверяет корректность токена.
-        - Устанавливает новый пароль пользователю.
+    - Принимает токен и новый пароль.
+    - Проверяет корректность токена.
+    - Устанавливает новый пароль пользователю.
     """
+
     permission_classes = (AllowAny,)
+
     def post(self, request):
         serializer = PasswordResetConfirmSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -138,6 +143,7 @@ class EmailVerificationAPIView(APIView):
     - Активирует пользователя (`is_active=True`) при успешной проверке токена.
     - Удаляет токен после успешного подтверждения.
     """
+
     permission_classes = (AllowAny,)
 
     def get(self, request, token):
@@ -145,7 +151,9 @@ class EmailVerificationAPIView(APIView):
         user = get_object_or_404(User, token=token)
 
         if user.is_active:
-            return Response({"error": "Email уже подтверждён."}, status=HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": "Email уже подтверждён."}, status=HTTP_400_BAD_REQUEST
+            )
 
         # Активируем пользователя и удаляем токен
         user.is_active = True

@@ -42,9 +42,7 @@ INSTALLED_APPS = [
 ]
 
 REST_FRAMEWORK = {
-    "DEFAULT_FILTER_BACKENDS": (
-        "django_filters.rest_framework.DjangoFilterBackend",
-    ),
+    "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
@@ -58,15 +56,13 @@ REST_FRAMEWORK = {
         "djangorestframework_camel_case.parser.CamelCaseJSONParser",
     ),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-
 }
 
 
 SPECTACULAR_SETTINGS = {
-
-    'CAMELIZE_NAMES': True,  # Включаем преобразование имен в camelCase
-    'POSTPROCESSING_HOOKS': [
-        'drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields',
+    "CAMELIZE_NAMES": True,  # Включаем преобразование имен в camelCase
+    "POSTPROCESSING_HOOKS": [
+        "drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields",
     ],
 }
 
@@ -144,8 +140,8 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = (
     [os.path.join(BASE_DIR, "static")]
     if (
-        os.path.exists(os.path.join(BASE_DIR, "static")) and
-        os.listdir(os.path.join(BASE_DIR, "static"))
+        os.path.exists(os.path.join(BASE_DIR, "static"))
+        and os.listdir(os.path.join(BASE_DIR, "static"))
     )
     else []
 )
@@ -154,7 +150,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_PORT = os.getenv("EMAIL_PORT")
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
@@ -186,8 +182,8 @@ if CACHE_ENABLED:
 
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
 AUTH_USER_MODEL = "users.User"
@@ -254,8 +250,6 @@ CORS_ALLOW_CREDENTIALS = True
 
 # настройки для телеграм - бота
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-
-
 
 
 # CICD ([flake8])

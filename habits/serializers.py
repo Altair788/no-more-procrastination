@@ -9,6 +9,7 @@ class LinkedHabitSerializer(serializers.ModelSerializer):
     Сериализатор для связанной привычки.
     Для более детального отображения данных о связанной привычке в запросах.
     """
+
     class Meta:
         model = Habit
         fields = ("id", "action", "is_pleasant")
@@ -16,8 +17,9 @@ class LinkedHabitSerializer(serializers.ModelSerializer):
 
 class HabitSerializer(serializers.ModelSerializer):
     """
-        Сериализатор для модели Habit.
+    Сериализатор для модели Habit.
     """
+
     owner = serializers.PrimaryKeyRelatedField(read_only=True)
     is_pleasant = serializers.BooleanField(allow_null=True, required=False)
     is_public = serializers.BooleanField(allow_null=True, required=False)
@@ -51,4 +53,3 @@ class HabitSerializer(serializers.ModelSerializer):
         validator = HabitValidator()
         validator(data)
         return data
-
