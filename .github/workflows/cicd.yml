@@ -100,6 +100,7 @@ jobs:
       - name: Run tests
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         run: poetry run python manage.py test
 
   # настройка докер - образов приложения  в рамках git_hub actions
