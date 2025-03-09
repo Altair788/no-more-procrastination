@@ -96,7 +96,7 @@ def send_daily_reminders(self):
     """
     Ежедневная задача для отправки напоминаний о привычках.
     """
-    today = now().date()
+    # today = now().date()
     current_time = now().time()
 
     # Фильтруем привычки, которые должны быть выполнены сегодня

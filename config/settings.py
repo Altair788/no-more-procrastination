@@ -3,18 +3,14 @@ import sys
 from datetime import timedelta
 from pathlib import Path
 
-from celery.schedules import crontab
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env", override=True)
 
-
 SECRET_KEY = os.getenv("SECRET_KEY")
 
-
 DEBUG = os.getenv("DEBUG", False) == "True"
-
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
@@ -59,14 +55,12 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
-
 SPECTACULAR_SETTINGS = {
     "CAMELIZE_NAMES": True,  # Включаем преобразование имен в camelCase
     "POSTPROCESSING_HOOKS": [
         "drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields",
     ],
 }
-
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -110,7 +104,6 @@ DATABASES = {
     }
 }
 
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
@@ -134,18 +127,16 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 STATIC_URL = "static/"
+
 STATICFILES_DIRS = (
     [os.path.join(BASE_DIR, "static")]
-    if (
-        os.path.exists(os.path.join(BASE_DIR, "static"))
-        and os.listdir(os.path.join(BASE_DIR, "static"))
-    )
+    if (os.path.exists(os.path.join(BASE_DIR, "static")) and os.listdir(os.path.join(BASE_DIR, "static")))
     else []
 )
+
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 MEDIA_URL = "/media/"
@@ -159,15 +150,12 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
 
-
 SERVER_EMAIL = EMAIL_HOST_USER
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-
 
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 CRISPY_TEMPLATE_PACK = "bootstrap4"
-
 
 LOGIN_URL = "/users/login/"
 
@@ -181,14 +169,12 @@ if CACHE_ENABLED:
         }
     }
 
-
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
 AUTH_USER_MODEL = "users.User"
-
 
 # Настройки для Celery
 
@@ -241,17 +227,14 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8000",
 ]
 
-
 # Отключаем разрешение для всех источников
 CORS_ALLOW_ALL_ORIGINS = False
 
 # Дополнительные настройки для разработки
 CORS_ALLOW_CREDENTIALS = True
 
-
 # настройки для телеграм - бота
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-
 
 # CICD ([flake8])
 # это нужно, чтобы при запуске тестов использовалась легкая SQLite, а не PostgreSQL
