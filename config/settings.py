@@ -16,8 +16,6 @@ ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
 # тестовая запись для проверки работы cicd
 
-
-
 # Application definition
 
 INSTALLED_APPS = [
