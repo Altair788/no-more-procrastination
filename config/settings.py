@@ -15,7 +15,7 @@ DEBUG = os.getenv("DEBUG", False) == "True"
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
 # тестовая запись для проверки работы cicd
-
+# еще одна тестова запись
 # Application definition
 
 INSTALLED_APPS = [
