@@ -217,6 +217,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",  # Django development server
     "http://127.0.0.1:3000",
     "http://127.0.0.1:8000",
+    "http://130.193.54.21",
+    "https://130.193.54.21",
 ]
 
 # Доверенные источники для CSRF
@@ -225,6 +227,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:8000",
+    "http://130.193.54.21",
+    "https://130.193.54.21",
 ]
 
 # Отключаем разрешение для всех источников
