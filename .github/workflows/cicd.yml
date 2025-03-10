@@ -144,7 +144,7 @@ jobs:
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
             docker stop myapp || true
             docker rm myapp || true
-            docker run -d --name myapp -p 80:8000 \
+            docker run -d --name myapp -p 8080:8000 \
               -e SECRET_KEY='${{ secrets.SECRET_KEY }}' \
               -e DEBUG='${{ secrets.DEBUG }}' \
               -e ALLOWED_HOSTS='${{ secrets.ALLOWED_HOSTS }}' \
