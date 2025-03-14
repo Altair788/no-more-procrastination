@@ -1,19 +1,18 @@
 import json
 
 from django.test import TestCase
-from rest_framework.test import APITestCase
 from rest_framework import status
+from rest_framework.test import APITestCase
 
 from users.models import User
 
 #  тестирование методов модели User
 
+
 class UserModelTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(
-            email="test@example.com",
-            password="password123",
-            is_active=True
+            email="test@example.com", password="password123", is_active=True
         )
 
     def test_create_user(self):
@@ -29,8 +28,7 @@ class UserModelTest(TestCase):
         Тест создания суперпользователя.
         """
         superuser = User.objects.create_superuser(
-            email="admin@example.com",
-            password="adminpassword"
+            email="admin@example.com", password="adminpassword"
         )
         self.assertTrue(superuser.is_staff)
         self.assertTrue(superuser.is_superuser)
@@ -45,6 +43,7 @@ class UserModelTest(TestCase):
 
 #  Тесты для регистрации пользователя
 
+
 class UserRegisterAPIViewTest(APITestCase):
     def test_register_user(self):
         """
@@ -54,13 +53,11 @@ class UserRegisterAPIViewTest(APITestCase):
             "email": "newuser@example.com",
             "password": "newpassword123",
             "phone": "+1234567890",
-            "country": "USA"
+            "country": "USA",
         }
 
         response = self.client.post(
-            "/users/register/",
-            data=json.dumps(data),
-            content_type="application/json"
+            "/users/register/", data=json.dumps(data), content_type="application/json"
         )
 
         # Проверяем статус ответа
@@ -68,17 +65,18 @@ class UserRegisterAPIViewTest(APITestCase):
 
         # Проверяем, что пользователь создан
         user = User.objects.get(email="newuser@example.com")
-        self.assertFalse(user.is_active)  # Пользователь должен быть неактивным по умолчанию
+        self.assertFalse(
+            user.is_active
+        )  # Пользователь должен быть неактивным по умолчанию
 
 
 #  Тесты для подтверждения email
 
+
 class EmailVerificationAPIViewTest(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(
-            email="test@example.com",
-            password="password123",
-            token="testtoken"
+            email="test@example.com", password="password123", token="testtoken"
         )
 
     def test_email_verification(self):
@@ -95,12 +93,12 @@ class EmailVerificationAPIViewTest(APITestCase):
         self.assertTrue(self.user.is_active)
         self.assertIsNone(self.user.token)
 
+
 #  Тесты для сброса пароля
 class PasswordResetAPIViewTest(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(
-            email="test@example.com",
-            password="password123"
+            email="test@example.com", password="password123"
         )
 
     def test_password_reset_request(self):
@@ -111,8 +109,9 @@ class PasswordResetAPIViewTest(APITestCase):
 
         response = self.client.post(
             "/users/password-reset/",
-            data = json.dumps(data),
-            content_type = "application/json",)
+            data=json.dumps(data),
+            content_type="application/json",
+        )
         # Проверяем статус ответа
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -124,24 +123,19 @@ class PasswordResetAPIViewTest(APITestCase):
 class PasswordResetConfirmAPIViewTest(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(
-            email="test@example.com",
-            password="password123",
-            token="testtoken"
+            email="test@example.com", password="password123", token="testtoken"
         )
 
     def test_password_reset_confirm(self):
         """
         Тест подтверждения сброса пароля.
         """
-        data = {
-            "token": "testtoken",
-            "new_password": "newpassword123"
-        }
+        data = {"token": "testtoken", "new_password": "newpassword123"}
 
         response = self.client.post(
             "/users/password-reset-confirm/",
-            data = json.dumps(data),
-            content_type = "application/json",
+            data=json.dumps(data),
+            content_type="application/json",
         )
 
         # Проверяем статус ответа
@@ -151,4 +145,3 @@ class PasswordResetConfirmAPIViewTest(APITestCase):
         self.user.refresh_from_db()
 
         self.assertTrue(self.user.check_password("newpassword123"))
-

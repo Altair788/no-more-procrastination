@@ -7,7 +7,7 @@ from users.models import User
 
 class UserSerializer(serializers.ModelSerializer):
     """
-        Сериализатор для модели User.
+    Сериализатор для модели User.
     """
 
     password = serializers.CharField(write_only=True, style={"input_type": "password"})
@@ -20,7 +20,7 @@ class UserSerializer(serializers.ModelSerializer):
     avatar = serializers.ImageField(
         allow_null=True,  # Поле может быть пустым
         required=False,  # Необязательно для заполнения
-        use_url=True  # Возвращать полный URL (если настроен MEDIA_URL)
+        use_url=True,  # Возвращать полный URL (если настроен MEDIA_URL)
     )
 
     def create(self, validated_data):
@@ -62,6 +62,7 @@ class PasswordResetSerializer(serializers.Serializer):
     Этот сериализатор проверяет, существует ли пользователь с указанным email,
     и генерирует токен для сброса пароля
     """
+
     email = serializers.EmailField()
 
     def validate_email(self, value):
@@ -82,6 +83,7 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
     Этот сериализатор принимает токен и новый пароль,
     проверяет их и обновляет пароль пользователя
     """
+
     token = serializers.CharField()
     new_password = serializers.CharField(write_only=True)
 

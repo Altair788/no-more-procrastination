@@ -1,0 +1,181 @@
+name: Django CI/CD Pipeline
+
+on: [ push, pull_request ]
+
+jobs:
+  # блокирующие проверки (линтеры и тесты).
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12.9'
+
+      # установка зависимостей проекта
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.5.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Run Flake8
+        run: |
+          echo "[flake8]
+          exclude = 
+              .venv,
+              .git,
+              __pycache__,
+              .venv/lib/python3.12/site-packages/phonenumbers/geodata/,
+              */migrations/*
+          max-line-length = 120
+          ignore = W504" > .flake8
+          poetry run flake8 .
+  
+
+  test:
+    runs-on: ubuntu-latest
+    needs: lint
+    services:
+      postgres:
+        image: postgres:16.0
+        env:
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
+
+    steps:
+      # клонирование репо с исходным кодом
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      # установка Python нужной версии
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12.9'
+
+      # кеширование зависимостей
+      - name: Cache Poetry dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pypoetry
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-
+
+      # установка зависимостей проекта
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: 1.5.1
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      - name: Install dependencies
+        run: poetry install
+
+      # выполнение миграции БД для подготовки схемы
+      - name: Run migrate
+        env:
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_HOST: localhost
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        run: poetry run python manage.py migrate
+
+      # запуск тестов для проверки работоспособности приложения
+      - name: Run tests
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        run: poetry run python manage.py test
+
+  # настройка докер - образов приложения  в рамках git_hub actions
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      # клонируем код из репо
+      - name: Check out code
+        uses: actions/checkout@v3
+      # авторизуемся в докерхаб, использую данные из секретов
+      - name: Login in Docker Hub
+        run: echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
+      # собираем докер - образ, используя тег из последнего комита
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }} .
+
+      # отправляем собранный образ в Docker Hub
+      - name: Push Docker image to Docker Hub
+        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
+
+      # указываем необходимость выполнения этой job для deploy
+
+  deploy:
+    runs-on: ubuntu-latest
+    # указываем, что будет запускаться только после успешного выполнения теста или build (в зависимости от вариации)
+    needs: build
+
+    steps:
+      # настройка ssh - подключения из приватного ключа из github secrets.
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      # Подключаемся к серверу и выполняем команды развертывания докер - контейнера
+      - name: Deploy to Server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << EOF
+            cd /home/test/no-more-procrastination
+            git pull origin develop
+            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
+            docker stop myapp || true
+            docker rm myapp || true
+            docker run -d --name myapp -p 8080:8000 \
+              -v /home/test/no-more-procrastination:/app \
+              -e SECRET_KEY='${{ secrets.SECRET_KEY }}' \
+              -e DEBUG='${{ secrets.DEBUG }}' \
+              -e ALLOWED_HOSTS='${{ secrets.ALLOWED_HOSTS }}' \
+              -e POSTGRES_DB='${{ secrets.POSTGRES_DB }}' \
+              -e POSTGRES_USER='${{ secrets.POSTGRES_USER }}' \
+              -e POSTGRES_PASSWORD='${{ secrets.POSTGRES_PASSWORD }}' \
+              -e POSTGRES_HOST='${{ secrets.POSTGRES_HOST }}' \
+              -e POSTGRES_PORT='${{ secrets.POSTGRES_PORT }}' \
+              -e CELERY_BROKER_URL='${{ secrets.CELERY_BROKER_URL }}' \
+              -e CELERY_BACKEND='${{ secrets.CELERY_BACKEND }}' \
+              -e EMAIL_HOST='${{ secrets.EMAIL_HOST }}' \
+              -e EMAIL_PORT='${{ secrets.EMAIL_PORT }}' \
+              -e EMAIL_HOST_USER='${{ secrets.EMAIL_HOST_USER }}' \
+              -e EMAIL_HOST_PASSWORD='${{ secrets.EMAIL_HOST_PASSWORD }}' \
+              -e EMAIL_USE_SSL='${{ secrets.EMAIL_USE_SSL }}' \
+              -e EMAIL_USE_TLS='${{ secrets.EMAIL_USE_TLS }}' \
+              -e TELEGRAM_BOT_TOKEN='${{ secrets.TELEGRAM_BOT_TOKEN }}' \
+              -e SUPERUSER_EMAIL='${{ secrets.SUPERUSER_EMAIL }}' \
+              -e SUPERUSER_PASSWORD='${{ secrets.SUPERUSER_PASSWORD }}' \
+              -e NORMAL_USER_EMAIL='${{ secrets.NORMAL_USER_EMAIL }}' \
+              -e NORMAL_USER_PASSWORD='${{ secrets.NORMAL_USER_PASSWORD }}' \
+              ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
+          EOF
+#      # полностью все из коробки, но надо следить за volumes(за сохранностью данных)
+#      - name: Deploy to Server
+#        run: |
+#          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << EOF
+#            cd /home/test/no-more-procrastination
+#            docker compose pull
+#            docker compose up -d --build
+#          EOF

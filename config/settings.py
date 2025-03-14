@@ -1,21 +1,21 @@
 import os
-from pathlib import Path
-from dotenv import load_dotenv
+import sys
 from datetime import timedelta
-from celery.schedules import crontab
+from pathlib import Path
+
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env", override=True)
 
-
 SECRET_KEY = os.getenv("SECRET_KEY")
-
 
 DEBUG = os.getenv("DEBUG", False) == "True"
 
-
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
+# тестовая запись для проверки работы cicd
+# еще одна тестова запись
 # Application definition
 
 INSTALLED_APPS = [
@@ -41,9 +41,7 @@ INSTALLED_APPS = [
 ]
 
 REST_FRAMEWORK = {
-    "DEFAULT_FILTER_BACKENDS": (
-        "django_filters.rest_framework.DjangoFilterBackend",
-    ),
+    "DEFAULT_FILTER_BACKENDS": ("django_filters.rest_framework.DjangoFilterBackend",),
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
@@ -57,18 +55,14 @@ REST_FRAMEWORK = {
         "djangorestframework_camel_case.parser.CamelCaseJSONParser",
     ),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-
 }
-
 
 SPECTACULAR_SETTINGS = {
-
-    'CAMELIZE_NAMES': True,  # Включаем преобразование имен в camelCase
-    'POSTPROCESSING_HOOKS': [
-        'drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields',
+    "CAMELIZE_NAMES": True,  # Включаем преобразование имен в camelCase
+    "POSTPROCESSING_HOOKS": [
+        "drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields",
     ],
 }
-
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -104,14 +98,13 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": os.getenv("NAME"),
-        "USER": os.getenv("USER"),
-        "PASSWORD": os.getenv("PASSWORD"),
-        "HOST": os.getenv("HOST"),
-        "PORT": os.getenv("PORT"),
+        "NAME": os.getenv("POSTGRES_DB"),
+        "USER": os.getenv("POSTGRES_USER"),
+        "PASSWORD": os.getenv("POSTGRES_PASSWORD"),
+        "HOST": os.getenv("POSTGRES_HOST"),
+        "PORT": os.getenv("POSTGRES_PORT"),
     }
 }
-
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -136,15 +129,22 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 STATIC_URL = "static/"
 
+STATICFILES_DIRS = (
+    [os.path.join(BASE_DIR, "static")]
+    if (os.path.exists(os.path.join(BASE_DIR, "static")) and os.listdir(os.path.join(BASE_DIR, "static")))
+    else []
+)
+
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_PORT = os.getenv("EMAIL_PORT")
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
@@ -152,15 +152,12 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
 
-
 SERVER_EMAIL = EMAIL_HOST_USER
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-
 
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 CRISPY_TEMPLATE_PACK = "bootstrap4"
-
 
 LOGIN_URL = "/users/login/"
 
@@ -174,23 +171,21 @@ if CACHE_ENABLED:
         }
     }
 
-
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
 }
 
 AUTH_USER_MODEL = "users.User"
-
 
 # Настройки для Celery
 
 # URL-адрес брокера сообщений (Например, Redis,
 # который по умолчанию работает на порту 6379)
-CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
 
 # URL-адрес брокера результатов, также Redis
-CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/0"
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
 
 # Часовой пояс для работы Celery
 CELERY_TIMEZONE = "Europe/Moscow"
@@ -224,6 +219,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",  # Django development server
     "http://127.0.0.1:3000",
     "http://127.0.0.1:8000",
+    "http://130.193.54.21",
+    "https://130.193.54.21",
+    "http://130.193.54.21:8080",
 ]
 
 # Доверенные источники для CSRF
@@ -232,8 +230,10 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:8000",
+    "http://130.193.54.21",
+    "https://130.193.54.21",
+    "http://130.193.54.21:8080",
 ]
-
 
 # Отключаем разрешение для всех источников
 CORS_ALLOW_ALL_ORIGINS = False
@@ -241,6 +241,18 @@ CORS_ALLOW_ALL_ORIGINS = False
 # Дополнительные настройки для разработки
 CORS_ALLOW_CREDENTIALS = True
 
-
 # настройки для телеграм - бота
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+
+# CICD ([flake8])
+# это нужно, чтобы при запуске тестов использовалась легкая SQLite, а не PostgreSQL
+
+if "test" in sys.argv:
+    CELERY_TASK_ALWAYS_EAGER = True  # Выполнять задачи синхронно
+    CELERY_TASK_EAGER_PROPAGATES = True  # Пропускать ошибки из задач
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "test_db.sqlite3",
+        }
+    }

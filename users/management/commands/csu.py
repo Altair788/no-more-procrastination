@@ -30,11 +30,15 @@ class Command(BaseCommand):
             # self.stdout.write(self.style.SUCCESS(f"Пароль суперпользователя установлен: {superuser_password}"))
             superuser.save()
             self.stdout.write(
-                self.style.SUCCESS(f"Суперпользователь с почтой {superuser_email} создан.")
+                self.style.SUCCESS(
+                    f"Суперпользователь с почтой {superuser_email} создан."
+                )
             )
         else:
             self.stdout.write(
-                self.style.WARNING(f"Пользователь с почтой {superuser_email} уже существует.")
+                self.style.WARNING(
+                    f"Пользователь с почтой {superuser_email} уже существует."
+                )
             )
 
         # Проверяем, существует ли обычный пользователь
