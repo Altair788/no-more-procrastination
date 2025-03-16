@@ -114,6 +114,7 @@ class PasswordResetAPIView(APIView):
             {"message": "Инструкция по сбросу пароля отправлена на ваш email."}
         )
 
+
 # TODO: 404
 class PasswordResetConfirmAPIView(APIView):
     """
