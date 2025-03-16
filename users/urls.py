@@ -22,7 +22,7 @@ urlpatterns = [
     ),
     path("password-reset/", PasswordResetAPIView.as_view(), name="password_reset"),
     path(
-        "password-reset-confirm/",
+        "password-reset-confirm/<str:token>/",
         PasswordResetConfirmAPIView.as_view(),
         name="password_reset_confirm",
     ),

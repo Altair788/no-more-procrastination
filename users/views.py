@@ -114,7 +114,7 @@ class PasswordResetAPIView(APIView):
             {"message": "Инструкция по сбросу пароля отправлена на ваш email."}
         )
 
-
+# TODO: 404
 class PasswordResetConfirmAPIView(APIView):
     """
     Представление для подтверждения сброса пароля.
@@ -126,7 +126,8 @@ class PasswordResetConfirmAPIView(APIView):
 
     permission_classes = (AllowAny,)
 
-    def post(self, request):
+    def post(self, request, token):
+        request.data.update({"token": token})
         serializer = PasswordResetConfirmSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
