@@ -117,11 +117,11 @@ jobs:
         run: echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
       # собираем докер - образ, используя тег из последнего комита
       - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }} .
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/myapp_habit_tracker:${{ github.sha }} .
 
       # отправляем собранный образ в Docker Hub
       - name: Push Docker image to Docker Hub
-        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
+        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/myapp_habit_tracker:${{ github.sha }}
 
       # указываем необходимость выполнения этой job для deploy
 
@@ -141,13 +141,13 @@ jobs:
       - name: Deploy to Server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << EOF
-            cd /home/test/no-more-procrastination
+            cd /root/habit_tracker/no-more-procrastination
             git pull origin develop
-            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
-            docker stop myapp || true
-            docker rm myapp || true
-            docker run -d --name myapp -p 8080:8000 \
-              -v /home/test/no-more-procrastination:/app \
+            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/myapp_habit_tracker:${{ github.sha }}
+            docker stop myapp_habit_tracker || true
+            docker rm myapp_habit_tracker || true
+            docker run -d --name myapp_habit_tracker -p 8080:8000 \
+              -v /root/habit_tracker/no-more-procrastination:/app \
               -e SECRET_KEY='${{ secrets.SECRET_KEY }}' \
               -e DEBUG='${{ secrets.DEBUG }}' \
               -e ALLOWED_HOSTS='${{ secrets.ALLOWED_HOSTS }}' \
@@ -169,7 +169,7 @@ jobs:
               -e SUPERUSER_PASSWORD='${{ secrets.SUPERUSER_PASSWORD }}' \
               -e NORMAL_USER_EMAIL='${{ secrets.NORMAL_USER_EMAIL }}' \
               -e NORMAL_USER_PASSWORD='${{ secrets.NORMAL_USER_PASSWORD }}' \
-              ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
+              ${{ secrets.DOCKER_HUB_USERNAME }}/myapp_habit_tracker:${{ github.sha }}
           EOF
 #      # полностью все из коробки, но надо следить за volumes(за сохранностью данных)
 #      - name: Deploy to Server

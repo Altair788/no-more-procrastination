@@ -11,8 +11,11 @@ from rest_framework.views import APIView
 
 from config.settings import DEFAULT_FROM_EMAIL
 from users.models import User
-from users.serializers import (PasswordResetConfirmSerializer,
-                               PasswordResetSerializer, UserSerializer)
+from users.serializers import (
+    PasswordResetConfirmSerializer,
+    PasswordResetSerializer,
+    UserSerializer,
+)
 
 
 class UserCreateAPIView(CreateAPIView):
@@ -115,7 +118,6 @@ class PasswordResetAPIView(APIView):
         )
 
 
-# TODO: 404
 class PasswordResetConfirmAPIView(APIView):
     """
     Представление для подтверждения сброса пароля.

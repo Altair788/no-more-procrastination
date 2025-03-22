@@ -133,7 +133,7 @@ class PasswordResetConfirmAPIViewTest(APITestCase):
         data = {"token": "testtoken", "new_password": "newpassword123"}
 
         response = self.client.post(
-            "/users/password-reset-confirm/",
+            f"/users/password-reset-confirm/{self.user.token}/",
             data=json.dumps(data),
             content_type="application/json",
         )

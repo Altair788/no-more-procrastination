@@ -5,5 +5,7 @@ exclude =
     __pycache__,
     */migrations/*,
     */tests/*,
-    */settings/*
+    */settings/*,
+    config/settings.py
 max-line-length = 120
+ignore = W503, E126, E121
