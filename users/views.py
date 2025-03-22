@@ -115,7 +115,6 @@ class PasswordResetAPIView(APIView):
         )
 
 
-# TODO: 404
 class PasswordResetConfirmAPIView(APIView):
     """
     Представление для подтверждения сброса пароля.
