@@ -141,13 +141,13 @@ jobs:
       - name: Deploy to Server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << EOF
-            cd /home/test/no-more-procrastination
+            cd /root/habit_tracker/no-more-procrastination
             git pull origin develop
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/myapp:${{ github.sha }}
             docker stop myapp || true
             docker rm myapp || true
             docker run -d --name myapp -p 8080:8000 \
-              -v /home/test/no-more-procrastination:/app \
+              -v /root/habit_tracker/no-more-procrastination:/app \
               -e SECRET_KEY='${{ secrets.SECRET_KEY }}' \
               -e DEBUG='${{ secrets.DEBUG }}' \
               -e ALLOWED_HOSTS='${{ secrets.ALLOWED_HOSTS }}' \
