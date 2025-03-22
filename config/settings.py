@@ -136,9 +136,9 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = (
     [os.path.join(BASE_DIR, "static")]
     if (
-        os.path.exists(os.path.join(BASE_DIR, "static"))
-        and os.listdir(os.path.join(BASE_DIR, "static"))
-    )
+            os.path.exists(os.path.join(BASE_DIR, "static"))
+            and os.listdir(os.path.join(BASE_DIR, "static"))
+        )
     else []
 )
 
