@@ -133,12 +133,20 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 STATIC_URL = "static/"
 
+# STATICFILES_DIRS = (
+#     [os.path.join(BASE_DIR, "static")]
+#     if (
+#             os.path.exists(os.path.join(BASE_DIR, "static"))
+#             and os.listdir(os.path.join(BASE_DIR, "static"))
+#         )
+#     else []
+# )
+
+
 STATICFILES_DIRS = (
     [os.path.join(BASE_DIR, "static")]
-    if (
-            os.path.exists(os.path.join(BASE_DIR, "static"))
-            and os.listdir(os.path.join(BASE_DIR, "static"))
-        )
+    if os.path.exists(os.path.join(BASE_DIR, "static"))
+    and os.listdir(os.path.join(BASE_DIR, "static"))
     else []
 )
 
