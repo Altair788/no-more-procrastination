@@ -7,4 +7,4 @@ exclude =
     */tests/*,
     */settings/*
 max-line-length = 120
-ignore = W503
+ignore = W503, E126, E121
